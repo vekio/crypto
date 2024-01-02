@@ -1,6 +1,7 @@
 package rsa
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -119,13 +120,28 @@ func ComparePublicKeys(k1, k2 *rsa.PublicKey) bool {
 		k1.E == k2.E
 }
 
-func PrintPrivateKey(keyPair *rsa.PrivateKey) {
+func PrintPrivateKey(keyPair *rsa.PrivateKey) error {
 	privateKeyBlock := &pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(keyPair),
 	}
 
-	pem.Encode(os.Stdout, privateKeyBlock)
+	return pem.Encode(os.Stdout, privateKeyBlock)
+}
+
+func PrivateKeyData(keyPair *rsa.PrivateKey) (string, error) {
+	privateKeyBlock := &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(keyPair),
+	}
+
+	var privateKeyData bytes.Buffer
+
+	if err := pem.Encode(&privateKeyData, privateKeyBlock); err != nil {
+		return "", err
+	}
+
+	return privateKeyData.String(), nil
 }
 
 // func getIdRsaStr() string {
